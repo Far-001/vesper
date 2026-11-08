@@ -6,4 +6,3 @@ src-tauri/.cargo/
 .DS_Store
 *.log
 testdata/
-release/

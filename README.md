@@ -36,15 +36,13 @@ Windows в этот выпуск не входит.
 
 ## Установка
 
-Пакет Linux amd64: `Vesper_0.1.0_amd64.deb`, около 6 МБ. Ему нужны GTK 3 и WebKitGTK 4.1. На Ubuntu 24.04 это пакет `libwebkit2gtk-4.1-0`. Для opus, wma, ape и других редких форматов нужен ещё `ffmpeg`.
+Пакет Linux amd64: [Vesper_0.1.0_amd64.deb](release/Vesper_0.1.0_amd64.deb), около 6 МБ. Ему нужны GTK 3 и WebKitGTK 4.1. На Ubuntu 22.04 и 24.04 это пакет `libwebkit2gtk-4.1-0`. Для opus, wma, ape и других редких форматов нужен ещё `ffmpeg`.
 
 ```bash
 sudo apt install ./Vesper_0.1.0_amd64.deb
 ```
 
 После установки программа запускается командой `vesper`.
-
-На машине, где собирался этот выпуск, файл лежит в `release/Vesper_0.1.0_amd64.deb`. Эта папка не входит в git: установщик не хранится рядом с исходниками. Во вкладку Releases его можно приложить вручную к тегу `v0.1.0`.
 
 ## Сборка из исходников
 
