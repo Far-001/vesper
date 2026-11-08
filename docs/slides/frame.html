@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <title>Vesper slides</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #05060a;
+      --panel: rgba(8, 10, 16, 0.78);
+      --line: rgba(255, 255, 255, 0.08);
+      --text: #e8e6df;
+      --muted: #8b90a0;
+      --cyan: #3ee0ff;
+      --magenta: #ff3d9a;
+      --lime: #d6ff4a;
+      font-family: "Instrument Sans", "Cantarell", "Noto Sans", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: var(--bg); color: var(--text); }
+    .stage { position: relative; width: 1180px; height: 740px; overflow: hidden; background: var(--bg); }
+    canvas { position: absolute; inset: 0; }
+    .vignette {
+      position: absolute; inset: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse at 50% 42%, transparent 0%, rgba(5,6,10,.18) 46%, rgba(5,6,10,.78) 100%),
+        linear-gradient(to top, rgba(5,6,10,.72), transparent 28%);
+    }
+    .titlebar {
+      position: absolute; top: 0; left: 0; right: 0; height: 44px;
+      display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+      padding: 0 8px 0 16px;
+    }
+    .brand { letter-spacing: .28em; text-transform: uppercase; font-size: 12px; font-weight: 600; }
+    .flag { letter-spacing: .42em; text-transform: uppercase; font-size: 11px; color: var(--magenta); text-align: center; }
+    .win { justify-self: end; color: var(--muted); letter-spacing: .4em; }
+    .hero { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%); width: 640px; text-align: center; }
+    .eyebrow { letter-spacing: .32em; text-transform: uppercase; color: var(--cyan); font-size: 12px; }
+    h1 { margin: 10px 0 8px; font-size: 42px; font-weight: 500; letter-spacing: -.03em; line-height: 1.05; }
+    .hero p { color: var(--muted); margin: 0 auto; max-width: 460px; }
+    .ether {
+      margin-top: 22px; border: 1px solid rgba(255,61,154,.7); color: var(--magenta);
+      background: transparent; border-radius: 999px; padding: 8px 16px;
+      box-shadow: 0 0 16px rgba(255,61,154,.18);
+    }
+    .deck {
+      position: absolute; left: 16px; right: 16px; bottom: 14px;
+      display: grid; grid-template-columns: 76px 1fr; gap: 16px; align-items: center;
+      padding: 14px 16px 12px; background: var(--panel); border: 1px solid var(--line);
+      border-radius: 18px; box-shadow: 0 18px 50px rgba(0,0,0,.35);
+    }
+    .cover {
+      width: 76px; height: 76px; border-radius: 12px; display: grid; place-items: center;
+      background: linear-gradient(160deg, rgba(62,224,255,.2), rgba(255,61,154,.18));
+      color: var(--cyan); font-weight: 600;
+    }
+    .title { font-size: 20px; }
+    .artist, .meta { color: var(--muted); font-size: 13px; }
+    .line { display: flex; justify-content: space-between; gap: 12px; }
+    .bpm {
+      font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12px; color: var(--cyan);
+      border: 1px solid rgba(62,224,255,.35); border-radius: 999px; padding: 3px 8px;
+    }
+    .seek { height: 3px; margin: 12px 0 6px; border-radius: 99px; background: rgba(255,255,255,.08); }
+    .seek span { display: block; height: 100%; width: 38%; border-radius: 99px; background: linear-gradient(90deg, var(--cyan), var(--magenta)); }
+    .times { display: flex; justify-content: space-between; font-family: ui-monospace, monospace; font-size: 11px; color: var(--muted); }
+    .transport { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 12px; color: var(--muted); }
+    .play {
+      width: 46px; height: 46px; border-radius: 999px; display: grid; place-items: center;
+      border: 1px solid rgba(62,224,255,.65); color: var(--cyan); background: rgba(62,224,255,.08);
+    }
+    .chip { border: 1px solid var(--line); border-radius: 999px; padding: 6px 10px; }
+    .chip.on { color: var(--magenta); border-color: rgba(255,61,154,.7); }
+    .spacer { flex: 1; }
+    .drawer {
+      position: absolute; top: 52px; bottom: 138px; width: 360px;
+      background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 14px;
+    }
+    .left { left: 16px; }
+    .right { right: 16px; }
+    .head { display: flex; justify-content: space-between; align-items: center; }
+    h2 { margin: 0; font-size: 16px; font-weight: 560; }
+    .search, .row {
+      width: 100%; border: 1px solid var(--line); background: rgba(255,255,255,.03);
+      border-radius: 10px; color: var(--text);
+    }
+    .search { margin: 12px 0; padding: 8px 10px; color: var(--muted); }
+    .row { text-align: left; padding: 8px 10px; margin-bottom: 6px; border-left: 2px solid transparent; }
+    .row.active { border-left-color: var(--cyan); background: rgba(62,224,255,.06); }
+    .reason { display: block; color: var(--lime); font-size: 12px; margin-top: 3px; }
+    .eq {
+      position: absolute; left: 50%; bottom: 150px; transform: translateX(-50%);
+      width: 520px; padding: 14px; background: var(--panel); border: 1px solid var(--line); border-radius: 16px;
+    }
+    .presets { display: flex; gap: 6px; }
+    .presets span { border: 1px solid var(--line); border-radius: 999px; padding: 4px 8px; font-size: 12px; color: var(--muted); }
+    .presets .on { color: var(--text); border-color: rgba(62,224,255,.5); }
+    .bands { display: flex; justify-content: space-between; height: 140px; margin-top: 12px; align-items: flex-end; }
+    .band { width: 28px; text-align: center; font-size: 10px; color: var(--muted); }
+    .band i { display: block; width: 4px; margin: 0 auto 6px; border-radius: 99px; background: linear-gradient(var(--magenta), var(--cyan)); }
+  </style>
+</head>
+<body>
+  <div class="stage" id="hero"></div>
+  <script>
+    const bars = Array.from({length: 64}, (_, i) => 0.15 + 0.75 * Math.abs(Math.sin(i * 0.37) * Math.cos(i * 0.11)));
+    function paint(canvas) {
+      const c = canvas.getContext("2d");
+      const w = canvas.width, h = canvas.height;
+      c.clearRect(0, 0, w, h);
+      const gap = 6, bw = (w - gap * 65) / 64;
+      bars.forEach((v, i) => {
+        const bh = v * h * 0.62;
+        const x = gap + i * (bw + gap);
+        const g = c.createLinearGradient(0, h - bh, 0, h);
+        g.addColorStop(0, "#3ee0ff");
+        g.addColorStop(1, "#ff3d9a");
+        c.fillStyle = g;
+        c.globalAlpha = 0.9;
+        c.fillRect(x, h - bh - 80, bw, bh);
+      });
+    }
+    function shell(flag) {
+      return `<div class="titlebar"><div class="brand">Vesper</div><div class="flag">${flag}</div><div class="win">– □ ×</div></div>
+        <canvas width="1180" height="740"></canvas><div class="vignette"></div>`;
+    }
+    const scenes = {
+      hero: shell("") + `<div class="hero"><div class="eyebrow">локальное ночное радио</div><h1>Соберите эфир из своей музыки</h1><p>Темп, энергия и яркость — без облака и аккаунтов. Спектр живёт на всём окне.</p><button class="ether">Открыть папку</button></div>
+        <footer class="deck"><div class="cover">V</div><div><div class="line"><div><div class="title">Ничего не играет</div><div class="artist">Откройте папку или выберите трек</div></div></div><div class="seek"><span style="width:0"></span></div><div class="times"><span>0:00</span><span>0:00</span></div><div class="transport"><span class="play">▶</span><span class="chip">Эфир</span><span class="spacer"></span><span class="chip">громкость</span></div></div></footer>`,
+      library: shell("") + `<aside class="drawer left"><div class="head"><h2>Библиотека</h2><span class="chip on">папка</span></div><div class="search">поиск · ночь</div>
+        <div class="row active"><b>Ночной порт</b><div class="meta">Север · 4:12</div></div>
+        <div class="row"><b>Тихий дождь</b><div class="meta">Маяк · 3:41</div></div>
+        <div class="row"><b>После полуночи</b><div class="meta">Линза · 5:02</div></div>
+        <div class="row"><b>Синий коридор</b><div class="meta">Веспер · 3:18</div></div></aside>
+        <footer class="deck"><div class="cover">V</div><div><div class="line"><div><div class="title">Ночной порт</div><div class="artist">Север · Причал</div></div><span class="bpm">96 bpm</span></div><div class="seek"><span></span></div><div class="times"><span>1:24</span><span>4:12</span></div><div class="transport"><span class="play">Ⅱ</span><span class="chip">Эфир</span><span class="chip on">библиотека</span></div></div></footer>`,
+      ether: shell("эфир") + `<aside class="drawer right"><div class="head"><h2>Эфир</h2><span class="meta">04</span></div>
+        <div class="row active"><b>Ночной порт</b><div class="meta">Север · 96 bpm</div><span class="reason">старт эфира</span></div>
+        <div class="row"><b>Тихий дождь</b><div class="meta">Маяк · 98 bpm</div><span class="reason">темп близко, энергия тише</span></div>
+        <div class="row"><b>Синий коридор</b><div class="meta">Веспер · 102 bpm</div><span class="reason">яркость темнее</span></div>
+        <div class="row"><b>После полуночи</b><div class="meta">Линза · 94 bpm</div><span class="reason">темп и энергия рядом</span></div></aside>
+        <section class="eq"><div class="presets"><span>Ровно</span><span>Рок</span><span>Бас</span><span>Вокал</span><span class="on">Ночь</span></div><div class="bands">${
+          ["32","64","125","250","500","1k","2k","4k","8k","16k"].map((n,i)=>`<div class="band"><i style="height:${[40,70,90,60,30,50,80,46,24,18][i]}px"></i>${n}</div>`).join("")
+        }</div></section>
+        <footer class="deck"><div class="cover">V</div><div><div class="line"><div><div class="title">Тихий дождь</div><div class="artist">Маяк · Ночная сторона</div></div><span class="bpm">98 bpm</span></div><div class="seek"><span style="width:62%"></span></div><div class="times"><span>2:16</span><span>3:41</span></div><div class="transport"><span class="play">Ⅱ</span><span class="chip on">Эфир</span><span class="chip">EQ</span><span class="chip on">очередь</span></div></div></footer>`
+    };
+    const name = new URLSearchParams(location.search).get("scene") || "hero";
+    const stage = document.getElementById("hero");
+    stage.innerHTML = scenes[name] || scenes.hero;
+    paint(stage.querySelector("canvas"));
+  </script>
+</body>
+</html>
